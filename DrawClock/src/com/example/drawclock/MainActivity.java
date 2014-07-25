@@ -169,27 +169,58 @@ public class MainActivity extends Activity implements SensorEventListener{
 //			isScan[count1]=1;
 			
 			int degree=getDegree(values[0], values[1]);
+			int degreeZ=calcAngleZ(values[0], values[1], values[2]);
 			int index=-1;
 			if(degree != -1){
 				degree=transformDegree(degree);
 				index=(int) Math.floor(degree/2);
-				Log.d(Tag, "=====> index is " + index + "=====> degree is " + degree);
-				isScan[index]=1;
-				if(index > 0)
-					isScan[index-1]=1;
-				if(index < 179)
-					isScan[index+1]=1;
+				Log.d(Tag, "=====> index is " + index + "=====> degree is " + degree + "=====> degreeZ is " + degreeZ);
+				if(isScan[index] == 0){
+					if(degreeZ < 30){
+						isScan[index]=1;
+						if(index > 0)
+							isScan[index-1]=1;
+						if(index < 179)
+							isScan[index+1]=1;
+					}
+					else{
+						isScan[index]=2;
+						if(index > 0)
+							isScan[index-1]=2;
+						if(index < 179)
+							isScan[index+1]=2;
+					}
+				}
+				if(isScan[index] == 1){
+					if(degreeZ >= 30){
+						isScan[index]=2;
+						if(index > 0)
+							isScan[index-1]=2;
+						if(index < 179)
+							isScan[index+1]=2;				
+					}
+				}
 			}
 //			canvas.drawCircle(-5, y, 5, paint);
 			for(int i=0;i<count;i++){
-				if(isScan[i] == 0)
+				if(isScan[i] == 0){
 					paint.setColor(Color.GRAY);
-				else
+					canvas.drawLine(0f, y, 0f, y+80, paint);
+				}
+				else{
 					paint.setColor(Color.WHITE);
-				if(i == index)
-					canvas.drawCircle(-20, y, 20, paint);
+					if(isScan[i] == 1){
+						canvas.drawLine(0f, y, 0f, y+40, paint);
+						paint.setColor(Color.GRAY);
+						canvas.drawLine(0f, y+40, 0f, y+80, paint);
+					}
+					if(isScan[i] == 2)
+						canvas.drawLine(0f, y, 0f, y+80, paint);
+				}
+//				if(i == index)
+//					paint.setColor(Color.RED);
+//					canvas.drawCircle(-20, y-20, 20, paint);
 				
-				canvas.drawLine(0f, y, 0f, y+80, paint);
 				canvas.rotate(360/count, 0f, 0f);
 			}
 //			isScan[count1]=0;
@@ -233,6 +264,19 @@ public class MainActivity extends Activity implements SensorEventListener{
 				angle += 360;
 		return (int) Math.floor(angle);
 	}
+
+	/***
+	 * 
+	 * 	0~90->90~0
+
+		90~180->360~270
+
+		180~270->270~180
+
+		270~360->180~90
+	 * @param degree
+	 * @return
+	 */
 	public int transformDegree(int degree){
 //		if((0 <= degree && degree < 90) || ( 180 <= degree && degree < 270))
 //			degree+=90;
@@ -247,5 +291,13 @@ public class MainActivity extends Activity implements SensorEventListener{
 			degree=0;
 		
 		return degree;
+	}
+	
+	public int calcAngleZ(float x,float y,float z){
+		Vector3D zaxis=new Vector3D(0f,0f,1.0f);
+		Vector3D direct=new Vector3D(x,y,z);
+		float angle=direct.angle(zaxis);
+		
+		return (int) Math.floor(Math.toDegrees(angle));
 	}
 }
