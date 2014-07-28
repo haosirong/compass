@@ -4,5 +4,5 @@
     <string name="app_name">DrawClock</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+	<drawable name="bkgcolor">#ff0000</drawable>
 </resources>
